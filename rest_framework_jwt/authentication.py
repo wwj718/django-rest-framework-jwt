@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# encoding: utf-8
 import jwt
 
 from django.contrib.auth import get_user_model
@@ -58,8 +60,15 @@ class BaseJSONWebTokenAuthentication(BaseAuthentication):
         try:
             user = User.objects.get_by_natural_key(username)
         except User.DoesNotExist:
-            msg = _('Invalid signature.')
-            raise exceptions.AuthenticationFailed(msg)
+            # 不存在则创建 类似CAS
+            # 隐含了这条假设 所有的username都是有效的
+            #msg = _('Invalid signature.')
+            #raise exceptions.AuthenticationFailed(msg)
+            password = username+"_pass"
+            user = User.objects.create_user(username=username, password=password)
+            #user.set_password(password)
+            user.is_active=True
+            user.save()
 
         if not user.is_active:
             msg = _('User account is disabled.')

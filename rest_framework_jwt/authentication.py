@@ -11,11 +11,15 @@ from rest_framework.authentication import (
 )
 
 from rest_framework_jwt.settings import api_settings
-
+import logging
+logger = logging.getLogger(__name__)
 
 jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
 jwt_get_username_from_payload = api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER
+# https://github.com/GetBlimp/django-rest-framework-jwt/blob/c2cf1b9853fb10f8243d5bdb912a619a7bfc8aa3/rest_framework_jwt/utils.py#L83 从payload中获取用户名
 
+#logger.info("jwt file go on")
+#print("hello")
 
 class BaseJSONWebTokenAuthentication(BaseAuthentication):
     """
@@ -50,6 +54,9 @@ class BaseJSONWebTokenAuthentication(BaseAuthentication):
         """
         Returns an active user that matches the payload's user id and email.
         """
+        #logger.info({"jwt payload":payload})
+        print({"jwt payload":payload}) #至此ok
+        #{'jwt payload': {'exp': 1499006978, 'iss': 'nosuchid', 'sub': 'acct:xxx@pwnote.paperweekly.site', 'iat': 1499003378}}
         User = get_user_model()
         username = jwt_get_username_from_payload(payload)
 
@@ -85,6 +92,8 @@ class JSONWebTokenAuthentication(BaseJSONWebTokenAuthentication):
 
         Authorization: JWT eyJhbGciOiAiSFMyNTYiLCAidHlwIj
     """
+    logger.info("jwt authenticate begin")
+    print("jwt authenticate begin")
     www_authenticate_realm = 'api'
 
     def get_jwt_value(self, request):
@@ -106,7 +115,7 @@ class JSONWebTokenAuthentication(BaseJSONWebTokenAuthentication):
             msg = _('Invalid Authorization header. Credentials string '
                     'should not contain spaces.')
             raise exceptions.AuthenticationFailed(msg)
-
+        logger.info(auth[1])
         return auth[1]
 
     def authenticate_header(self, request):
